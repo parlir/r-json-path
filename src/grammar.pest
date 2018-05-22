@@ -1,0 +1,69 @@
+// Operators
+space = _{ " " | "\t" }
+dot = { "." }
+root = _{ "$" }
+current_node = { "@" }
+wild_card = { "*" }
+deep_scan = { ".." }
+// FIXME
+context = _{ "@" }
+filter_value = { context ~ path }
+filter_expression = { filter_value ~ space* ~ filter_operation ~ space* ~ (filter_value | number | word_string ) }
+filter = { "?(" ~  space* ~ (filter_expression | filter_value) ~ space* ~ ")" }
+
+// Filter operators
+filter_equal = { "==" }
+filter_not_equal = { "!=" }
+filter_less = { "<" }
+filter_less_equal = { "<=" }
+filter_greater = { ">" }
+filter_greater_equal = { ">=" }
+filter_regex = { "=~" }
+// left exists in right [?(@.measure in ['inches', 'meters'])]
+filter_in = { "in" }
+filter_nin = { "nin" }
+// left is a subset of right
+// [?(@.measure subsetof ['inches', 'meters', 'miles'])]
+filter_subsetof = { "subsetof" }
+filter_size = { "size" }
+filter_empty = { "empty" }
+
+filter_operation = _{ filter_equal | filter_not_equal | filter_less | filter_less_equal | filter_greater | filter_greater_equal | filter_regex | filter_in | filter_nin | filter_subsetof | filter_size | filter_empty }
+
+// Functions
+fun_max = { "max()" }
+fun_min = { "min()" }
+fun_avg = { "avg()" }
+fun_stddev = { "stddev()" }
+fun_length = { "length()" }
+
+fun = { fun_max | fun_min | fun_avg | fun_stddev | fun_length }
+
+
+// booleans
+true_lit = { "true" }
+false_lit = { "false" }
+bool_lit = { true_lit | false_lit }
+
+// numbers
+digit = { '0'..'9' }
+int = { digit ~ digit* }
+number = { int ~ dot? ~ int? }
+
+// name keys
+character = _{ 'a'..'z' | 'A'..'Z' | '0'..'9' }
+word = { character ~ character* }
+
+// json key notations
+dot_notation = _{ "." ~ word }
+bracket_notation = _{ "[" ~ expression ~ "]" }
+key = { dot_notation | bracket_notation }
+
+quotation = _{ "\"" | "\'" }
+word_string = _{ quotation ~ word ~ quotation }
+
+path = _{ key* }
+expression = _{ root_path | filter | word_string }
+root_path = { root ~ path }
+json_path = _{ soi ~ root_path ~ eoi }
+
